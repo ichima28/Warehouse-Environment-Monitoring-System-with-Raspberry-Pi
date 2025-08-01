@@ -14,8 +14,6 @@ This project is a real-time temperature and humidity monitoring system for wareh
   - High temperature (red background)
   - High humidity (blue background)
   - Low temperature (light blue background)
-  - Combined warning with buzzer
-- Manual buzzer control via Dashboard button
 - Alert throttling to avoid repetitive triggers
 
 ## Technologies
@@ -58,7 +56,16 @@ warehouse-monitoring/
    - Includes a button to manually turn off the buzzer.
 
 ## Setup Instructions
-
+### Firstly
+```bash
+pip3 install -r requirements.txt
+```
+- If you are using virtual enviroment remember to activate it
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
 ### Raspberry Pi Side
 
 1. **Install dependencies**:
@@ -102,6 +109,8 @@ bash <(curl -sL https://raw.githubusercontent.com/node-red/linux-installers/mast
 📷 Screenshots
 
 📝 Future Improvements
+- Combined warning with buzzer 
+- Manual buzzer control via Dashboard button
 - Data logging to CSV or cloud database
 - Email/SMS notifications
 - Multi-zone warehouse monitoring
