@@ -1,0 +1,370 @@
+[
+    {
+        "id": "f0d9c1a0a12a4b0e",
+        "type": "tab",
+        "label": "Warehouse Flow",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "mqtt_in_data",
+        "type": "mqtt in",
+        "z": "f0d9c1a0a12a4b0e",
+        "name": "DHT data",
+        "topic": "warehouse/sensors/dht11",
+        "qos": "0",
+        "datatype": "auto",
+        "broker": "a1b2c3d4e5f601",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 150,
+        "y": 120,
+        "wires": [
+            [
+                "json_parse"
+            ]
+        ]
+    },
+    {
+        "id": "json_parse",
+        "type": "json",
+        "z": "f0d9c1a0a12a4b0e",
+        "name": "parse JSON",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 330,
+        "y": 120,
+        "wires": [
+            [
+                "chg_temp",
+                "chg_humi",
+                "chart_func"
+            ]
+        ]
+    },
+    {
+        "id": "chg_temp",
+        "type": "change",
+        "z": "f0d9c1a0a12a4b0e",
+        "name": "Temp → msg.payload & topic",
+        "rules": [
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "Temperature (°C)",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.temperature_c",
+                "tot": "msg"
+            }
+        ],
+        "x": 590,
+        "y": 80,
+        "wires": [
+            [
+                "gauge_temp"
+            ]
+        ]
+    },
+    {
+        "id": "chg_humi",
+        "type": "change",
+        "z": "f0d9c1a0a12a4b0e",
+        "name": "Humi → msg.payload & topic",
+        "rules": [
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "Humidity (%)",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.humidity_pct",
+                "tot": "msg"
+            }
+        ],
+        "x": 590,
+        "y": 160,
+        "wires": [
+            [
+                "gauge_humi"
+            ]
+        ]
+    },
+    {
+        "id": "gauge_temp",
+        "type": "ui_gauge",
+        "z": "f0d9c1a0a12a4b0e",
+        "name": "Temperature",
+        "group": "ui_group_sensors",
+        "order": 1,
+        "width": 6,
+        "height": 5,
+        "gtype": "gage",
+        "title": "Temperature",
+        "label": "°C",
+        "format": "{{value}} °C",
+        "min": 0,
+        "max": "50",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "className": "",
+        "x": 840,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "gauge_humi",
+        "type": "ui_gauge",
+        "z": "f0d9c1a0a12a4b0e",
+        "name": "Humidity",
+        "group": "ui_group_sensors",
+        "order": 2,
+        "width": 6,
+        "height": 5,
+        "gtype": "gage",
+        "title": "Humidity",
+        "label": "%",
+        "format": "{{value}} %",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "className": "",
+        "x": 840,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "chart_func",
+        "type": "function",
+        "z": "f0d9c1a0a12a4b0e",
+        "name": "To chart series",
+        "func": "const out = [];\nif (typeof msg.payload?.temperature_c === 'number') {\n    out.push({ topic: 'Temperature (°C)', payload: msg.payload.temperature_c });\n}\nif (typeof msg.payload?.humidity_pct === 'number') {\n    out.push({ topic: 'Humidity (%)', payload: msg.payload.humidity_pct });\n}\n// emit messages one-by-one\nreturn [out];",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 600,
+        "y": 240,
+        "wires": [
+            [
+                "chart_th"
+            ]
+        ]
+    },
+    {
+        "id": "chart_th",
+        "type": "ui_chart",
+        "z": "f0d9c1a0a12a4b0e",
+        "name": "Temperature & Humidity",
+        "group": "ui_group_sensors",
+        "order": 3,
+        "width": 12,
+        "height": 6,
+        "label": "Temp & Humidity over time",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "auto",
+        "interpolate": "linear",
+        "nodata": "Waiting for data...",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": "10",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#e61d0f",
+            "#0f71f0",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#000000",
+            "#000000"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 860,
+        "y": 240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "mqtt_alert_in",
+        "type": "mqtt in",
+        "z": "f0d9c1a0a12a4b0e",
+        "name": "Nhận cảnh báo",
+        "topic": "warehouse/alerts",
+        "qos": "1",
+        "datatype": "auto",
+        "broker": "mqtt_broker_config",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 180,
+        "y": 320,
+        "wires": [
+            [
+                "parse_alert_json"
+            ]
+        ]
+    },
+    {
+        "id": "parse_alert_json",
+        "type": "function",
+        "z": "f0d9c1a0a12a4b0e",
+        "name": "Phân tích cảnh báo",
+        "func": "let parsed = JSON.parse(msg.payload);\nlet alertText = parsed.message || \"\";\nlet bgColor = \"\";\nlet isHot = alertText.includes(\"High temperature\");\nlet isHumid = alertText.includes(\"Humidity High\");\n\n// Gộp text nếu có nhiều loại cảnh báo\nlet messages = [];\nif (isHot) messages.push(\"🌡️ Nhiệt độ cao\");\nif (isHumid) messages.push(\"💧 Độ ẩm cao\");\n\nlet fullText = messages.join(\" & \") + `\\n(${alertText})`;\n\n// Ưu tiên màu cảnh báo\nif (isHot && isHumid) {\n    bgColor = \"darkred\";  // cả 2 đều cảnh báo\n} else if (isHot) {\n    bgColor = \"red\";\n} else if (isHumid) {\n    bgColor = \"blue\";\n} else {\n    bgColor = \"gray\";\n}\n\nmsg.payload = {\n    text: fullText,\n    color: bgColor\n};\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 320,
+        "wires": [
+            [
+                "bc5a7e0d38963a5f",
+                "02c01ddf2e80d7d6"
+            ]
+        ]
+    },
+    {
+        "id": "bc5a7e0d38963a5f",
+        "type": "ui_template",
+        "z": "f0d9c1a0a12a4b0e",
+        "group": "ui_group_sensors",
+        "name": "Hiển thị cảnh báo",
+        "order": 0,
+        "width": "6",
+        "height": "2",
+        "format": "<script>\n    (function(scope) {\n    scope.$watch('msg.payload', function(payload) {\n        if (!payload || !payload.text) return;\n\n        var color = payload.color || 'gray';\n        var text = payload.text;\n\n        // Tạo thông báo popup\n        var alertBox = document.createElement('div');\n        alertBox.style.position = 'fixed';\n        alertBox.style.top = '20px';\n        alertBox.style.right = '20px';\n        alertBox.style.zIndex = 1000;\n        alertBox.style.backgroundColor = color;\n        alertBox.style.color = 'white';\n        alertBox.style.padding = '15px';\n        alertBox.style.borderRadius = '8px';\n        alertBox.style.boxShadow = '0 2px 6px rgba(0,0,0,0.2)';\n        alertBox.style.fontSize = '16px';\n        alertBox.innerText = text;\n\n        document.body.appendChild(alertBox);\n\n        // Tự động ẩn sau 5s\n        setTimeout(function() {\n            alertBox.remove();\n        }, 5000);\n    });\n})(scope);\n</script>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 610,
+        "y": 320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "02c01ddf2e80d7d6",
+        "type": "debug",
+        "z": "f0d9c1a0a12a4b0e",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 560,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "a1b2c3d4e5f601",
+        "type": "mqtt-broker",
+        "name": "HiveMQ Public",
+        "broker": "broker.hivemq.com",
+        "port": "1883",
+        "clientid": "",
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "closeTopic": "",
+        "closePayload": "",
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": ""
+    },
+    {
+        "id": "ui_group_sensors",
+        "type": "ui_group",
+        "name": "Sensors",
+        "tab": "ui_tab_warehouse",
+        "order": 1,
+        "disp": true,
+        "width": "12",
+        "collapse": false
+    },
+    {
+        "id": "mqtt_broker_config",
+        "type": "mqtt-broker",
+        "name": "MQTT HiveMQ",
+        "broker": "broker.hivemq.com",
+        "port": "1883",
+        "clientid": "node-red-alert-viewer",
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": ""
+    },
+    {
+        "id": "ui_tab_warehouse",
+        "type": "ui_tab",
+        "name": "Warehouse",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "abf4870504b0d7f1",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-dashboard": "3.6.5"
+        }
+    }
+]

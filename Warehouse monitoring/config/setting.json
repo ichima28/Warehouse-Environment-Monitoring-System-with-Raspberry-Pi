@@ -1,0 +1,13 @@
+{
+    "READ_INTERVAL_SEC": 5,
+    "TEMP_MAX": 30.0,
+    "TEMP_HYST": 0.5,
+    "HUMI_MIN": 40.0,
+    "HUMI_MAX": 70.0,
+    "ALERT_INTERVAL_SEC": 10,
+    "MQTT_BROKER": "broker.hivemq.com",
+    "MQTT_PORT": 1883,
+    "TOPIC_DATA": "warehouse/sensors/dht11",
+    "TOPIC_ALERT": "warehouse/alerts",
+    "LOG_DIR": "logs"
+}
