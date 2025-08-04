@@ -37,7 +37,10 @@ Warehouse-Environment-Monitoring-System-with-Raspberry-Pi/
 ├── README.md
 └── Warehouse monitoring/
     ├── assets/
-    │   └── Dashboard.jpg              # Dashboard screenshot
+    │   └── Dashboard.jpg                      # Dashboard screenshot
+    |   └── kit.jpg                            # Hardware connect
+    |   └── node_red_flow.jpg                  # Node-red Flow screenshot
+    |   └── Temp_humid_config.jpg              # Configuration screenshot
     ├── config/
     │   └── setting.json               # Configuration settings
     ├── dashboard node-red/
