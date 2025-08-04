@@ -106,9 +106,9 @@ bash <(curl -sL https://raw.githubusercontent.com/node-red/linux-installers/mast
 - Alert Popup with color-coded background
 - Button to stop buzzer manually
 
-📷 Screenshots
+### Screenshots
 
-📝 Future Improvements
+### Future Improvements
 - Combined warning with buzzer 
 - Manual buzzer control via Dashboard button
 - Data logging to CSV or cloud database
