@@ -299,7 +299,7 @@ For support and questions:
 - Review the configuration documentation
 
 ### Screenshots
-![Hardware](assets/kit.jpg)
-![Node-RED Flow](assets/node_red_flow.jpg)
-![Main Dashboard](assets/Dashboard.jpg)
-![Temperature & Humidity Config](assets/Temp_humid_config.jpg)
+![Hardware](Warehouse%20monitoring/assets/kit.jpg)
+![Node-RED Flow](Warehouse%20monitoring/assets/node_red_flow.jpg)
+![Main Dashboard](Warehouse%20monitoring/assets/Dashboard.jpg)
+![Temperature & Humidity Config](Warehouse%20monitoring/assets/Temp_humid_config.jpg)
