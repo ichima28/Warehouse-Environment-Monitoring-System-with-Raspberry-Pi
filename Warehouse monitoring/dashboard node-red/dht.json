@@ -1,0 +1,762 @@
+[
+    {
+        "id": "f16208a73956c009",
+        "type": "tab",
+        "label": "Temperature and Humidity Dashboard",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "f13ac58069d6e4bd",
+        "type": "junction",
+        "z": "f16208a73956c009",
+        "x": 1000,
+        "y": 520,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "6c8815e3d8d6df52",
+        "type": "inject",
+        "z": "f16208a73956c009",
+        "name": "Initialize Today",
+        "props": [
+            {
+                "p": "payload",
+                "v": "$moment().format('YYYY-MM-DD')",
+                "vt": "jsonata"
+            },
+            {
+                "p": "topic",
+                "v": "date",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.5,
+        "topic": "date",
+        "payload": "",
+        "payloadType": "jsonata",
+        "x": 180,
+        "y": 300,
+        "wires": [
+            [
+                "f668fb4b70a9d6e8"
+            ]
+        ]
+    },
+    {
+        "id": "0dc7d2fc1b093ce8",
+        "type": "inject",
+        "z": "f16208a73956c009",
+        "name": "Auto Refresh Chart",
+        "props": [
+            {
+                "p": "payload",
+                "v": "",
+                "vt": "date"
+            },
+            {
+                "p": "topic",
+                "v": "refresh",
+                "vt": "str"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.5,
+        "topic": "refresh",
+        "payload": "",
+        "payloadType": "date",
+        "x": 180,
+        "y": 380,
+        "wires": [
+            [
+                "f668fb4b70a9d6e8"
+            ]
+        ]
+    },
+    {
+        "id": "567e2efa2de6f209",
+        "type": "ui_date_picker",
+        "z": "f16208a73956c009",
+        "name": "Select Date",
+        "label": "Select Date",
+        "group": "b9c8d7e6.f5a4b3",
+        "order": 2,
+        "width": "12",
+        "height": 1,
+        "passthru": false,
+        "topic": "date",
+        "topicType": "str",
+        "className": "",
+        "x": 210,
+        "y": 460,
+        "wires": [
+            [
+                "f668fb4b70a9d6e8",
+                "906d7a48c4159813"
+            ]
+        ]
+    },
+    {
+        "id": "906d7a48c4159813",
+        "type": "debug",
+        "z": "f16208a73956c009",
+        "name": "Debug Date Selection",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 560,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "f668fb4b70a9d6e8",
+        "type": "function",
+        "z": "f16208a73956c009",
+        "name": "Prepare API Request",
+        "func": "let selectedDate;\nif (msg.topic === 'date') {\n    if (msg.payload === undefined || msg.payload === null || msg.payload === '0' || msg.payload === 0) {\n        selectedDate = flow.get('selectedDate') || new Date().toISOString().split('T')[0];\n        node.log(`Using default date: ${selectedDate}`);\n    } else if (typeof msg.payload === 'number' && msg.payload > 0) {\n        selectedDate = new Date(msg.payload).toISOString().split('T')[0];\n    } else if (typeof msg.payload === 'string' && msg.payload.match(/^\\d{4}-\\d{2}-\\d{2}T/)) {\n        selectedDate = msg.payload.split('T')[0];\n    } else if (typeof msg.payload === 'string' && msg.payload.match(/^\\d{4}-\\d{2}-\\d{2}$/)) {\n        selectedDate = msg.payload;\n    } else {\n        node.warn(`Invalid date selected: ${msg.payload}`);\n        return null;\n    }\n    if (selectedDate.match(/^\\d{4}-\\d{2}-\\d{2}$/)) {\n        flow.set('selectedDate', selectedDate);\n        node.log(`Selected date: ${selectedDate}`);\n    } else {\n        node.warn(`Invalid date format after conversion: ${selectedDate}`);\n        return null;\n    }\n} else if (msg.topic === 'refresh') {\n    selectedDate = flow.get('selectedDate') || new Date().toISOString().split('T')[0];\n    node.log(`Using stored or default date for refresh: ${selectedDate}`);\n}\n\nmsg.url = `http://localhost:3000/data?date=${selectedDate}`;\nmsg.method = 'GET';\nnode.log(`Requesting data for date: ${selectedDate}`);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 460,
+        "y": 380,
+        "wires": [
+            [
+                "6295efb6fbe2a973"
+            ]
+        ]
+    },
+    {
+        "id": "6295efb6fbe2a973",
+        "type": "http request",
+        "z": "f16208a73956c009",
+        "name": "Fetch Data",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 770,
+        "y": 380,
+        "wires": [
+            [
+                "0c3676bc3aa5f607",
+                "93186947350372bc"
+            ]
+        ]
+    },
+    {
+        "id": "93186947350372bc",
+        "type": "debug",
+        "z": "f16208a73956c009",
+        "name": "Debug API Data",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1040,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "0c3676bc3aa5f607",
+        "type": "function",
+        "z": "f16208a73956c009",
+        "name": "Prepare Chart Data",
+        "func": "const data = msg.payload;\n\nif (!Array.isArray(data)) {\n    node.warn('Invalid or empty data from API: ' + JSON.stringify(data));\n    const emptyMsg = {\n        payload: [{ series: ['temperature_c'], data: [[]], labels: ['Temperature (°C)'] }],\n        error: data.error || 'No data found for selected date'\n    };\n    const emptyMsg2 = {\n        payload: [{ series: ['humidity_pct'], data: [[]], labels: ['Humidity (%)'] }],\n        error: data.error || 'No data found for selected date'\n    };\n    return [emptyMsg, emptyMsg2, emptyMsg];\n}\n\n// Prepare Temperature Chart\nconst tempData = data.map(row => ({\n    x: new Date(row.timestamp).getTime(),\n    y: parseFloat(row.temperature_c) || 0\n}));\n\n// Prepare Humidity Chart\nconst humiData = data.map(row => ({\n    x: new Date(row.timestamp).getTime(),\n    y: parseFloat(row.humidity_pct) || 0\n}));\n\n// Output 1: Temperature data\nconst tempMsg = {\n    payload: [{ series: ['temperature_c'], data: [tempData], labels: ['Temperature (°C)'] }],\n    error: null\n};\n\n// Output 2: Humidity data\nconst humiMsg = {\n    payload: [{ series: ['humidity_pct'], data: [humiData], labels: ['Humidity (%)'] }],\n    error: null\n};\n\nnode.log(`Prepared chart data: ${data.length} rows`);\nreturn [tempMsg, humiMsg, null];",
+        "outputs": 2,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1050,
+        "y": 460,
+        "wires": [
+            [
+                "a53fdccaa0e50090"
+            ],
+            [
+                "de3e49fdfdf6e800"
+            ]
+        ]
+    },
+    {
+        "id": "a53fdccaa0e50090",
+        "type": "ui_chart",
+        "z": "f16208a73956c009",
+        "name": "Temperature Chart",
+        "group": "b9c8d7e6.f5a4b3",
+        "order": 5,
+        "width": "12",
+        "height": 6,
+        "label": "Temperature Chart",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "No Data Available",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1350,
+        "y": 440,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "de3e49fdfdf6e800",
+        "type": "ui_chart",
+        "z": "f16208a73956c009",
+        "name": "Humidity Chart",
+        "group": "b9c8d7e6.f5a4b3",
+        "order": 6,
+        "width": "12",
+        "height": 6,
+        "label": "Humidity Chart",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "No Data Available",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#ff7f0e",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1340,
+        "y": 520,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "50ffbf6407e69e8f",
+        "type": "ui_text",
+        "z": "f16208a73956c009",
+        "group": "b9c8d7e6.f5a4b3",
+        "order": 3,
+        "width": 12,
+        "height": 1,
+        "name": "Error Message",
+        "label": "",
+        "format": "{{msg.error}}",
+        "layout": "row-center",
+        "className": "",
+        "style": true,
+        "font": "",
+        "fontSize": "",
+        "color": "#d60000",
+        "x": 1320,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "ae0dba4dfb85d506",
+        "type": "ui_form",
+        "z": "f16208a73956c009",
+        "name": "Update Config",
+        "label": "Update Config",
+        "group": "b9c8d7e6.f5a4b3",
+        "order": 1,
+        "width": "12",
+        "height": 5,
+        "options": [
+            {
+                "label": "Device ID",
+                "value": "device_id",
+                "type": "text",
+                "required": true,
+                "rows": 1
+            },
+            {
+                "label": "TEMP_MIN",
+                "value": "TEMP_MIN",
+                "type": "number",
+                "required": false,
+                "rows": 1
+            },
+            {
+                "label": "TEMP_MAX",
+                "value": "TEMP_MAX",
+                "type": "number",
+                "required": false,
+                "rows": 1
+            },
+            {
+                "label": "HUMI_MIN",
+                "value": "HUMI_MIN",
+                "type": "number",
+                "required": false,
+                "rows": 1
+            },
+            {
+                "label": "HUMI_MAX",
+                "value": "HUMI_MAX",
+                "type": "number",
+                "required": false,
+                "rows": 1
+            }
+        ],
+        "formValue": {
+            "device_id": "",
+            "TEMP_MIN": "",
+            "TEMP_MAX": "",
+            "HUMI_MIN": "",
+            "HUMI_MAX": ""
+        },
+        "payload": "",
+        "submit": "Submit",
+        "cancel": "Cancel",
+        "topic": "config",
+        "topicType": "str",
+        "splitLayout": false,
+        "className": "",
+        "x": 880,
+        "y": 180,
+        "wires": [
+            [
+                "fb765546f3d04064"
+            ]
+        ]
+    },
+    {
+        "id": "fb765546f3d04064",
+        "type": "function",
+        "z": "f16208a73956c009",
+        "name": "Prepare MQTT Config",
+        "func": "if (msg.topic === 'config') {\n    const { device_id, TEMP_MAX, TEMP_MIN, HUMI_MIN, HUMI_MAX } = msg.payload;\n    const pi_name = device_id || flow.get('pi_name') || 'nhom2'; // Default to 'nhom2' if device_id and flow.pi_name are empty\n    flow.set('pi_name', pi_name); // Store pi_name in flow context\n    node.log(`Stored pi_name: ${pi_name}`);\n\n    const config = {};\n    if (TEMP_MAX !== undefined && TEMP_MAX !== '') config.TEMP_MAX = parseFloat(TEMP_MAX);\n    if (TEMP_MIN !== undefined && TEMP_MIN !== '') config.TEMP_MIN = parseFloat(TEMP_MIN);\n    if (HUMI_MIN !== undefined && HUMI_MIN !== '') config.HUMI_MIN = parseFloat(HUMI_MIN);\n    if (HUMI_MAX !== undefined && HUMI_MAX !== '') config.HUMI_MAX = parseFloat(HUMI_MAX);\n\n    if (Object.keys(config).length === 0) {\n        node.warn('At least one config value must be provided');\n        msg.error = 'At least one config value must be provided';\n        const formMsg = {\n            payload: {\n                device_id: pi_name,\n                TEMP_MAX: flow.get('config.TEMP_MAX') || '',\n                TEMP_MIN: flow.get('config.TEMP_MIN') || '',\n                HUMI_MIN: flow.get('config.HUMI_MIN') || '',\n                HUMI_MAX: flow.get('config.HUMI_MAX') || ''\n            },\n            topic: 'config'\n        };\n        return [null, formMsg]; // Still return formMsg to update UI\n    }\n\n    for (const key in config) {\n        if (isNaN(config[key]) || config[key] < 0) {\n            node.warn(`Invalid ${key}: ${config[key]}. Must be a non-negative number`);\n            msg.error = `Invalid ${key}: Must be a non-negative number`;\n            const formMsg = {\n                payload: {\n                    device_id: pi_name,\n                    TEMP_MAX: flow.get('config.TEMP_MAX') || '',\n                    TEMP_MIN: flow.get('config.TEMP_MIN') || '',\n                    HUMI_MIN: flow.get('config.HUMI_MIN') || '',\n                    HUMI_MAX: flow.get('config.HUMI_MAX') || ''\n                },\n                topic: 'config'\n            };\n            return [null, formMsg];\n        }\n    }\n\n    if ((config.TEMP_MAX !== undefined && config.TEMP_MIN !== undefined) && config.TEMP_MAX <= config.TEMP_MIN) {\n        node.warn('TEMP_MAX must be greater than TEMP_MIN');\n        msg.error = 'TEMP_MAX must be greater than TEMP_MIN';\n        const formMsg = {\n            payload: {\n                device_id: pi_name,\n                TEMP_MAX: flow.get('config.TEMP_MAX') || '',\n                TEMP_MIN: flow.get('config.TEMP_MIN') || '',\n                HUMI_MIN: flow.get('config.HUMI_MIN') || '',\n                HUMI_MAX: flow.get('config.HUMI_MAX') || ''\n            },\n            topic: 'config'\n        };\n        return [null, formMsg];\n    }\n\n    if ((config.HUMI_MAX !== undefined && config.HUMI_MIN !== undefined) && config.HUMI_MAX <= config.HUMI_MIN) {\n        node.warn('HUMI_MAX must be greater than HUMI_MIN');\n        msg.error = 'HUMI_MAX must be greater than HUMI_MIN';\n        const formMsg = {\n            payload: {\n                device_id: pi_name,\n                TEMP_MAX: flow.get('config.TEMP_MAX') || '',\n                TEMP_MIN: flow.get('config.TEMP_MIN') || '',\n                HUMI_MIN: flow.get('config.HUMI_MIN') || '',\n                HUMI_MAX: flow.get('config.HUMI_MAX') || ''\n            },\n            topic: 'config'\n        };\n        return [null, formMsg];\n    }\n\n    flow.set('config', config);\n    node.log(`Stored config: ${JSON.stringify(config)}`);\n    const formMsg = {\n        payload: {\n            device_id: pi_name,\n            TEMP_MAX: config.TEMP_MAX || flow.get('config.TEMP_MAX') || '',\n            TEMP_MIN: config.TEMP_MIN || flow.get('config.TEMP_MIN') || '',\n            HUMI_MIN: config.HUMI_MIN || flow.get('config.HUMI_MIN') || '',\n            HUMI_MAX: config.HUMI_MAX || flow.get('config.HUMI_MAX') || ''\n        },\n        topic: 'config'\n    };\n    msg.topic = `warehouse/config/${pi_name}`;\n    msg.payload = config;\n    node.log(`Sending config to MQTT: ${JSON.stringify(config)} for device ${pi_name}`);\n    return [msg, formMsg];\n}\nreturn [null, null];",
+        "outputs": 2,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 860,
+        "y": 300,
+        "wires": [
+            [
+                "5aa559aa7b833dca",
+                "ae0dba4dfb85d506"
+            ],
+            [
+                "50ffbf6407e69e8f"
+            ]
+        ]
+    },
+    {
+        "id": "5aa559aa7b833dca",
+        "type": "mqtt out",
+        "z": "f16208a73956c009",
+        "name": "Send Config to MQTT",
+        "topic": "",
+        "qos": "1",
+        "retain": "true",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "5ff3625bf9f135e7",
+        "x": 1340,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "a41c07826dc10a82",
+        "type": "inject",
+        "z": "f16208a73956c009",
+        "name": "Initialize Config",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "v": "config",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "0.1",
+        "topic": "config",
+        "payload": "",
+        "payloadType": "str",
+        "x": 200,
+        "y": 60,
+        "wires": [
+            [
+                "a6db769e6bb987cc"
+            ]
+        ]
+    },
+    {
+        "id": "a6db769e6bb987cc",
+        "type": "http request",
+        "z": "f16208a73956c009",
+        "name": "Fetch Config",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://localhost:3000/config",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 430,
+        "y": 60,
+        "wires": [
+            [
+                "1b5401a51e042d7b"
+            ]
+        ]
+    },
+    {
+        "id": "1b5401a51e042d7b",
+        "type": "function",
+        "z": "f16208a73956c009",
+        "name": "Store Config",
+        "func": "if (msg.topic === 'config') {\n    if (msg.payload && typeof msg.payload === 'object' && msg.payload.pi_name) {\n        flow.set('config', msg.payload);\n        flow.set('pi_name', msg.payload.pi_name);\n        node.log(`Stored config: ${JSON.stringify(msg.payload)}`);\n        node.log(`Stored pi_name: ${msg.payload.pi_name}`);\n        const formMsg = {\n            payload: {\n                device_id: msg.payload.pi_name,\n                TEMP_MAX: msg.payload.TEMP_MAX || '',\n                TEMP_MIN: msg.payload.TEMP_MIN || '',\n                HUMI_MIN: msg.payload.HUMI_MIN || '',\n                HUMI_MAX: msg.payload.HUMI_MAX || ''\n            },\n            topic: 'config'\n        };\n        return [formMsg, null];\n    } else {\n        node.warn('Invalid config data or missing pi_name: ' + JSON.stringify(msg.payload));\n        // Set default pi_name to 'nhom2' when data is invalid or missing\n        flow.set('pi_name', 'nhom2');\n        node.log(`Stored default pi_name: nhom2`);\n        const formMsg = {\n            payload: {\n                device_id: 'nhom2',\n                TEMP_MAX: '',\n                TEMP_MIN: '',\n                HUMI_MIN: '',\n                HUMI_MAX: ''\n            },\n            topic: 'config'\n        };\n        return [formMsg, null];\n    }\n}\nreturn [null, null];",
+        "outputs": 2,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 630,
+        "y": 60,
+        "wires": [
+            [
+                "ae0dba4dfb85d506",
+                "176a3b71a30a8d85"
+            ],
+            [
+                "50ffbf6407e69e8f"
+            ]
+        ]
+    },
+    {
+        "id": "176a3b71a30a8d85",
+        "type": "delay",
+        "z": "f16208a73956c009",
+        "name": "Delay MQTT Init",
+        "pauseType": "delay",
+        "timeout": "3",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 860,
+        "y": 60,
+        "wires": [
+            [
+                "057693a9c531c8de"
+            ]
+        ]
+    },
+    {
+        "id": "057693a9c531c8de",
+        "type": "inject",
+        "z": "f16208a73956c009",
+        "name": "Trigger MQTT Subscribe",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "v": "subscribe",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "0.1",
+        "topic": "subscribe",
+        "payload": "",
+        "payloadType": "str",
+        "x": 1130,
+        "y": 60,
+        "wires": [
+            [
+                "642ada26ff2be929"
+            ]
+        ]
+    },
+    {
+        "id": "642ada26ff2be929",
+        "type": "function",
+        "z": "f16208a73956c009",
+        "name": "Check Pi Name",
+        "func": "const pi_name = flow.get('pi_name') || '';\nif (pi_name) {\n    const topic = `warehouse/alerts/${pi_name}`;\n    node.log(`MQTT topic for alerts: ${topic}`);\n    return null;\n} else {\n    node.warn('pi_name not set, cannot confirm MQTT topic');\n    return null;\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1400,
+        "y": 60,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a28e88f327ef4b82",
+        "type": "mqtt in",
+        "z": "f16208a73956c009",
+        "name": "Receive Alerts",
+        "topic": "warehouse/alerts/nhom2",
+        "qos": "1",
+        "datatype": "json",
+        "broker": "5ff3625bf9f135e7",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 210,
+        "y": 580,
+        "wires": [
+            [
+                "5a6d44c7a1abe865",
+                "9f22df27ec610b15"
+            ]
+        ]
+    },
+    {
+        "id": "5a6d44c7a1abe865",
+        "type": "function",
+        "z": "f16208a73956c009",
+        "name": "Parse Alerts",
+        "func": "node.log(`Received message from MQTT topic: ${msg.topic}, payload: ${JSON.stringify(msg.payload)}`);\n\nconst pi_name = flow.get('pi_name') || '';\nif (!pi_name) {\n    node.warn('pi_name not set, cannot process alerts');\n    return null;\n}\nconst expectedTopic = `warehouse/alerts/${pi_name}`;\nif (msg.topic === expectedTopic) {\n    node.log(`Processing alert on topic: ${msg.topic}, message: ${JSON.stringify(msg.payload)}`);\n    let alertText = msg.payload.message || '';\n    let bgColor = '';\n    let isHot = alertText.includes('Nhiệt độ cao');\n    let isHumidHigh = alertText.includes('Độ ẩm cao');\n    let isHumidLow = alertText.includes('Độ ẩm thấp');\n    let messages = [];\n    if (isHot) messages.push('🌡️ Nhiệt độ cao');\n    if (isHumidHigh) messages.push('💧 Độ ẩm cao');\n    if (isHumidLow) messages.push('💧 Độ ẩm thấp');\n    let fullText = messages.join(' & ') + (messages.length > 0 ? `\\n(${alertText})` : alertText);\n    if (isHot && (isHumidHigh || isHumidLow)) {\n        bgColor = 'darkred';\n    } else if (isHot) {\n        bgColor = 'red';\n    } else if (isHumidHigh || isHumidLow) {\n        bgColor = 'blue';\n    } else {\n        bgColor = 'gray';\n    }\n    msg.payload = {\n        text: fullText,\n        color: bgColor\n    };\n    return msg;\n} else {\n    node.warn(`Alert topic ${msg.topic} does not match ${expectedTopic}`);\n    return null;\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "const pi_name = flow.get('pi_name') || '';\nif (pi_name) {\n    const topic = `warehouse/alerts/${pi_name}`;\n    node.log(`MQTT topic registered for alerts: ${topic}`);\n} else {\n    node.warn('pi_name not set, MQTT topic for alerts not registered');\n}",
+        "finalize": "",
+        "libs": [],
+        "x": 450,
+        "y": 620,
+        "wires": [
+            [
+                "c4f86e9ad99c916c",
+                "7b502ce71da8c329"
+            ]
+        ]
+    },
+    {
+        "id": "9f22df27ec610b15",
+        "type": "debug",
+        "z": "f16208a73956c009",
+        "name": "Debug MQTT Raw",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 470,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "c4f86e9ad99c916c",
+        "type": "ui_template",
+        "z": "f16208a73956c009",
+        "group": "b9c8d7e6.f5a4b3",
+        "name": "Display Alert",
+        "order": 4,
+        "width": "6",
+        "height": "2",
+        "format": "<script>\n    (function(scope) {\n    scope.$watch('msg.payload', function(payload) {\n        if (!payload || !payload.text) return;\n\n        var color = payload.color || 'gray';\n        var text = payload.text;\n\n        var alertBox = document.createElement('div');\n        alertBox.style.position = 'fixed';\n        alertBox.style.top = '20px';\n        alertBox.style.right = '20px';\n        alertBox.style.zIndex = 1000;\n        alertBox.style.backgroundColor = color;\n        alertBox.style.color = 'white';\n        alertBox.style.padding = '15px';\n        alertBox.style.borderRadius = '8px';\n        alertBox.style.boxShadow = '0 2px 6px rgba(0,0,0,0.2)';\n        alertBox.style.fontSize = '16px';\n        alertBox.innerText = text;\n\n        document.body.appendChild(alertBox);\n\n        setTimeout(function() {\n            alertBox.remove();\n        }, 5000);\n    });\n})(scope);\n</script>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 790,
+        "y": 600,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "7b502ce71da8c329",
+        "type": "debug",
+        "z": "f16208a73956c009",
+        "name": "Debug MQTT Alerts",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "{\n    \"topic\": topic,\n    \"message\": payload\n}",
+        "targetType": "jsonata",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 810,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "104c74e0cc410822",
+        "type": "status",
+        "z": "f16208a73956c009",
+        "name": "MQTT Broker Status",
+        "scope": [
+            "5ff3625bf9f135e7",
+            "a28e88f327ef4b82"
+        ],
+        "x": 230,
+        "y": 720,
+        "wires": [
+            [
+                "692b4434f0e5d93c"
+            ]
+        ]
+    },
+    {
+        "id": "692b4434f0e5d93c",
+        "type": "function",
+        "z": "f16208a73956c009",
+        "name": "Log MQTT Connect",
+        "func": "if (msg.status?.text === 'Connected' && msg.node?.id === '5ff3625bf9f135e7') {\n    const pi_name = flow.get('pi_name') || '';\n    if (pi_name) {\n        node.log(`MQTT broker connected, expecting topic: warehouse/alerts/${pi_name}`);\n    } else {\n        node.warn('MQTT broker connected, but pi_name not set');\n    }\n} else if (msg.node?.id === 'e1abda4684ccd6f8') {\n    node.log(`MQTT node Receive Alerts status: ${msg.status?.text}, topic: ${msg.status?.topic || 'unknown'}`);\n}\nreturn null;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 470,
+        "y": 720,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "b9c8d7e6.f5a4b3",
+        "type": "ui_group",
+        "name": "Sensor Dashboard",
+        "tab": "c0d1e2f3.a4b5c6",
+        "order": 1,
+        "disp": true,
+        "width": "12",
+        "collapse": false
+    },
+    {
+        "id": "5ff3625bf9f135e7",
+        "type": "mqtt-broker",
+        "name": "MQTT Broker",
+        "broker": "broker.hivemq.com",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "c0d1e2f3.a4b5c6",
+        "type": "ui_tab",
+        "name": "Sensor Dashboard",
+        "icon": "dashboard",
+        "order": 1,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "d5e9f1932506b3f1",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-dashboard": "3.6.5"
+        }
+    }
+]
