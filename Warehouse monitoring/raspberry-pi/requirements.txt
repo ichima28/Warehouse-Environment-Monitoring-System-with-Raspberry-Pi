@@ -1,3 +1,2 @@
-paho-mqtt==1.6.1
 Adafruit-DHT==1.4.0
 gpiozero==1.6.2
