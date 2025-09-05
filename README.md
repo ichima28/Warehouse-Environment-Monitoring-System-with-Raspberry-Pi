@@ -19,7 +19,7 @@ A comprehensive real-time temperature and humidity monitoring system for warehou
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Raspberry Pi  │    │   Local Storage │    │   Node-RED      │
-│   + DHT22       │──> │   (CSV Files)   │──> │   Server        │
+│   + DHT11       │──> │   (CSV Files)   │──> │   Server        │
 │   + Buzzer      │    │                 │    │                 │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
          │                       │                       │
@@ -137,9 +137,9 @@ Edit `Warehouse monitoring/config/setting.json`:
 
 | Component | GPIO Pin | Description |
 |-----------|----------|-------------|
-| DHT22 VCC | 3.3V | Power supply |
-| DHT22 GND | GND | Ground |
-| DHT22 DATA | GPIO4 | Data pin |
+| DHT11 VCC | 3.3V | Power supply |
+| DHT11 GND | GND | Ground |
+| DHT11 DATA | GPIO4 | Data pin |
 | Buzzer + | GPIO22 | Audio alerts |
 | LED + | GPIO17 | Visual alerts |
 
@@ -299,7 +299,7 @@ For support and questions:
 - Review the configuration documentation
 
 ### Screenshots
-![Hardware](Warehouse%20monitoring/assets/kit.jpg)
-![Node-RED Flow](Warehouse%20monitoring/assets/node_red_flow.jpg)
-![Main Dashboard](Warehouse%20monitoring/assets/Dashboard.jpg)
-![Temperature & Humidity Config](Warehouse%20monitoring/assets/Temp_humid_config.jpg)
+
+### Demo video
+[Demo Video](https://youtu.be/eXG3QqjdFYY?si=TtNAcl2Jsyc0xPek)
+
