@@ -209,7 +209,7 @@ curl -X POST http://your-pi-ip:1880/api/config \
 {
   "temperature": 25.6,
   "humidity": 65.2,
-  "timestamp": "2024-01-15T10:30:00Z",
+  "timestamp": "2025-07-20T10:30:00Z",
   "sensor_id": "dht22_01"
 }
 ```
